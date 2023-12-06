@@ -2,9 +2,9 @@ import { cn } from "@/lib/utils";
 import { useUser } from "@clerk/nextjs";
 import { Message } from "ai";
 import { useChat } from "ai/react";
-import { Bot, Trash, XCircle } from "lucide-react";
+import { Bot, Globe2, StickyNote, Trash, XCircle } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 type Props = {
@@ -14,6 +14,8 @@ type Props = {
 };
 
 function ChatBot({ open, onClose, toggleOpen }: Props) {
+  const [checkNotes, setCheckNotes] = useState(true);
+
   const {
     messages,
     input,
@@ -22,7 +24,11 @@ function ChatBot({ open, onClose, toggleOpen }: Props) {
     setMessages,
     isLoading,
     error,
-  } = useChat();
+  } = useChat({
+    body: {
+      checkNotes: checkNotes,
+    },
+  });
 
   const inputRef = useRef<HTMLInputElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -55,20 +61,40 @@ function ChatBot({ open, onClose, toggleOpen }: Props) {
             <p className="font-bold">Vector Chat</p>
 
             <div className="flex items-center gap-2">
-              {messages.length > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  type="button"
-                  onClick={() => setMessages([])}
-                  className="shrink-0"
-                  title="clear chat"
-                >
-                  <Trash className="mr-2 h-4 w-4" />
-                  Clear
-                </Button>
-              )}
+              {open && (
+                <>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setCheckNotes(!checkNotes);
+                    }}
+                  >
+                    {checkNotes ? (
+                      <StickyNote className="mr-2" />
+                    ) : (
+                      <Globe2 className="mr-2" />
+                    )}
 
+                    {checkNotes ? "Scanning Notes" : "Scanning Web"}
+                  </Button>
+                  {messages.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      type="button"
+                      onClick={() => setMessages([])}
+                      className="shrink-0"
+                      title="clear chat"
+                    >
+                      <Trash className="mr-2 h-4 w-4" />
+                      Clear
+                    </Button>
+                  )}
+                </>
+              )}
               <button
                 onClick={onClose}
                 type="button"
@@ -81,7 +107,7 @@ function ChatBot({ open, onClose, toggleOpen }: Props) {
         </div>
 
         <div className={cn(open ? "block" : "hidden")}>
-          <div className="mt-3 h-[600px] overflow-y-auto px-3 " ref={scrollRef}>
+          <div className="my-3 h-[600px] overflow-y-auto px-3 " ref={scrollRef}>
             {messages.map((message) => (
               <ChatMessage key={message.id} message={message} />
             ))}
@@ -104,7 +130,9 @@ function ChatBot({ open, onClose, toggleOpen }: Props) {
             {!error && messages.length === 0 && (
               <div className="mt-3 flex h-full items-center justify-center gap-3">
                 <Bot />
-                Ask the AI a question about your notes
+                {checkNotes
+                  ? "Ask the AI a question about your notes"
+                  : "Standard AI chat"}
               </div>
             )}
           </div>

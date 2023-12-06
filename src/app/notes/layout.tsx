@@ -17,7 +17,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <>
       <div className="p-4 shadow">
         <div className="m-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
-          <Link href="/notes" className="flex items-center gap-1">
+          <Link href="/" className="flex items-center gap-1">
             AiVectors
           </Link>
           <div className="flex items-center gap-2">
